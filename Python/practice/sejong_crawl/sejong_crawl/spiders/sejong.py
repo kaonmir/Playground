@@ -43,11 +43,20 @@ class SejongSpider(CrawlSpider):
         hangul_list = map(lambda html: extractTextFromHTML(html), title_html)
         return "\n\n".join(hangul_list)
 
+    def parse_hanza(self, response):
+        path: str = '//*[@id="cont_area"]/div[1]/div[3]/div[2]/div/div/p'
+        hanza_html: list = response.xpath(path).getall()
+        hanza_list = map(lambda html: extractTextFromHTML(html), hanza_html)
+        return "".join(hanza_list)
+
+    # TODO: footnote parser
+
     def parse_item(self, response):
         item = {}
 
         item["volume"], item["date"] = self.parse_volume_date(response)
         item["title"] = self.parse_title(response)
         item["hangul"] = self.parse_hangul(response)
+        item["hanza"] = self.parse_hanza(response)
 
         return item
