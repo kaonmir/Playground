@@ -7,8 +7,8 @@ import scrapy
 
 
 class SejongCrawlItem(scrapy.Item):
-    # volume = scrapy.Field()  # 세종실록 1권
-    # date = scrapy.Field()  # 세종 즉위년 8월 11일 무자 1번째기사
+    volume = scrapy.Field()  # 세종실록 1권
+    date = scrapy.Field()  # 세종 즉위년 8월 11일 무자 1번째기사
 
     title = scrapy.Field()  # (optional) 근정전에서 즉위 교서를 반포하다
     hangul = scrapy.Field()
