@@ -12,7 +12,7 @@ class SejongCrawlItem(scrapy.Item):
 
     title = scrapy.Field()  # (optional) 근정전에서 즉위 교서를 반포하다
     hangul = scrapy.Field()
-    # footnotes = scrapy.Field()  # 한글 주석, [註 162]전조(前朝) : 고려.
+    footnotes = scrapy.Field()  # 한글 주석, [註 162]전조(前朝) : 고려.
     hanza = scrapy.Field()
 
     pass
