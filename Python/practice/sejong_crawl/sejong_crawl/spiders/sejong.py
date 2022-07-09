@@ -1,5 +1,6 @@
 from cgi import parse_multipart
 from this import d
+from tkinter.ttk import Separator
 from urllib import response
 import scrapy
 from scrapy.linkextractors import LinkExtractor
@@ -8,15 +9,16 @@ from scrapy.responsetypes import Response
 import re
 
 
-def extractTextFromHTML(html: str):
+def extractTextFromHTML(html: str, isSpace: bool = True):
     regex = r">\s*(.*?)\s*<"
     foundRegex = re.findall(regex, html)
     stripedRegex = map(lambda x: x.strip(), foundRegex)
     filteredRegex = filter(lambda x: len(x) != 0, stripedRegex)
-    return " ".join(filteredRegex)
+
+    separator = " " if isSpace else ""
+    return separator.join(filteredRegex)
 
 
-# '<span class="idx_wrap idx_place">일본국</span> <span class="idx_wrap idx_place">대마주 수호(對馬州守護)</span>'
 class SejongSpider(CrawlSpider):
     name = "sejong"
     allowed_domains = ["sillok.history.go.kr"]
@@ -46,16 +48,18 @@ class SejongSpider(CrawlSpider):
         return extractTextFromHTML(title_html)
 
     def _parse_hangul(self, response):
-        path: str = "div.ins_left_in div.ins_view_pd .paragraph"
-        title_html: list = response.css(path).getall()
-        hangul_list = map(lambda html: extractTextFromHTML(html), title_html)
+        path: str = "div.ins_left_in>div.ins_view_pd>.paragraph"
+        hangul_html: list = response.css(path)
+        hangul_list = map(lambda html: extractTextFromHTML(html.get()), hangul_html)
         return "\n\n".join(hangul_list)
 
     def _parse_hanza(self, response):
-        path: str = '//*[@id="cont_area"]/div[1]/div[3]/div[2]/div/div/p'
-        hanza_html: list = response.xpath(path).getall()
-        hanza_list = map(lambda html: extractTextFromHTML(html), hanza_html)
-        return "".join(hanza_list)
+        path: str = "div.ins_right_in>div.ins_view_pd>.paragraph"
+        hanza_html: list = response.css(path)
+        hanza_list = map(
+            lambda html: extractTextFromHTML(html.get(), False), hanza_html
+        )
+        return "\n\n".join(hanza_list)
 
     def _extract_text_from_footnote(self, footnote):
         header = footnote.css(".idx_annotation04_foot::text").get().strip()
