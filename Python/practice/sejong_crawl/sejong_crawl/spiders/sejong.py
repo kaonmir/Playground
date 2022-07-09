@@ -1,5 +1,6 @@
 from cgi import parse_multipart
 from this import d
+from urllib import response
 import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
@@ -56,14 +57,15 @@ class SejongSpider(CrawlSpider):
         hanza_list = map(lambda html: extractTextFromHTML(html), hanza_html)
         return "".join(hanza_list)
 
+    def _extract_text_from_footnote(self, footnote):
+        header = footnote.css(".idx_annotation04_foot::text").get().strip()
+        body = footnote.css("div.clear2::text").get().strip()
+        return " ".join((header, body))
+
     def _parse_footnotes(self, response):
         path: str = ".ins_footnote li"
         footnotes_html: list = response.css(path)
-        footnotes_list = map(
-            lambda html: extractTextFromHTML(html.get()), footnotes_html
-        )
-
-    # [註 018]어명(御命) : 제령(制令).
+        return map(self._extract_text_from_footnote, footnotes_html)
 
     def parse_item(self, response):
         item = {}
@@ -71,5 +73,6 @@ class SejongSpider(CrawlSpider):
         item["title"] = self._parse_title(response)
         item["hangul"] = self._parse_hangul(response)
         item["hanza"] = self._parse_hanza(response)
+        item["footnotes"] = self._parse_footnotes(response)
 
         return item
