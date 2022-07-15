@@ -59,6 +59,8 @@ def main():
     log = LogEvent("kaonmir", "1234", "192.168.43.232", datetime.now())
     serialized = log.serialize()
     print(serialized)
+    print(LogEvent.__qualname__)
+    print(LogEvent.__name__)
 
 
 if __name__ == "__main__":
