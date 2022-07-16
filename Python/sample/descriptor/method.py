@@ -39,8 +39,6 @@ def main():
     print(K.__name__)
     print(k.__class__.__name__)
 
-    K
-
 
 if __name__ == "__main__":
     main()
