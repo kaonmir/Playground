@@ -1,5 +1,10 @@
 {
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/ansible-community/schemas/main/f/ansible.json#/$defs/playbook": "file:///Volumes/Code/Playground/Ansible/playbook/install-nginx.yaml"
+    "https://raw.githubusercontent.com/ansible-community/schemas/main/f/ansible.json#/$defs/playbook": [
+      "file:///Volumes/Code/Playground/Ansible/playbook/install-nginx.yaml",
+      "file:///Volumes/Code/Playground/Ansible/fastcampus/playbook/install-minikube.yaml",
+      "file:///Volumes/Code/Playground/Ansible/sample/playbook/restart.yaml"
+    ],
+    "https://raw.githubusercontent.com/ansible-community/schemas/main/f/ansible-inventory.json": "file:///Volumes/Code/Playground/Ansible/playbook/inventroy"
   }
 }
