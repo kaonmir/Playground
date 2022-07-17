@@ -9,20 +9,22 @@
   tasks:
     - name: "Step 1: Update System"
       apt:
-        name:
-          - apt-transport-https
+        name: apt-transport-https
         update_cache: yes
         state: latest
-        upgrade: yes
-    - name: "Step 1.1: Reboot System"
-      reboot:
 
-    - name: "Install KVM or VirtualBox Hypervisor"
+    # - name: "Step 1.1: Reboot System"
+    #   reboot:
+
+    - name: "Step 1.2: Configure dpkg"
+      command: dpkg --configure -a
+
+    - name: "Step 2: Install KVM or VirtualBox Hypervisor"
       apt:
         name:
           - virtualbox
           - virtualbox-ext-pack
-        state: latest
+        state: fixed
 
     - name: "Step 3: Download minikube on Ubuntu 22.04|20.04|18.04"
       uri:
@@ -64,6 +66,3 @@
       register: kubectl_cluster_info
 
     - debug: var=kubectl_cluster_info.stdout
-
----
-
