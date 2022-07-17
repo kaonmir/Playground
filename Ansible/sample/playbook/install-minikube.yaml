@@ -13,20 +13,22 @@
         update_cache: yes
         state: latest
 
-    # - name: "Step 1.1: Reboot System"
-    #   reboot:
-
-    - name: "Step 1.2: Configure dpkg"
-      command: dpkg --configure -a
-
     - name: "Step 2: Install KVM or VirtualBox Hypervisor"
       apt:
         name:
           - virtualbox
           - virtualbox-ext-pack
+          - linux-headers-generic
         state: fixed
 
-    - name: "Step 3: Download minikube on Ubuntu 22.04|20.04|18.04"
+    - name: "Step 1.1: Reboot System"
+      reboot:
+
+    - name: "Step 3.1: Remove existing minikube if it exists"
+      shell: "sudo rm -rf /usr/local/bin/minikube"
+      ignore_errors: yes
+
+    - name: "Step 3.2: Download minikube on Ubuntu 22.04|20.04|18.04"
       uri:
         url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
         dest: /usr/local/bin/minikube
@@ -41,21 +43,25 @@
         return_content: yes
       register: response_kubernetes_version
 
-    - name: "Step 4.2: Install kubectl on Ubuntu"
+    - name: "Step 4.2. Remove existing kubectl if it exists"
+      shell: "sudo rm -rf /usr/local/bin/kubectl"
+      ignore_errors: yes
+
+    - name: "Step 4.3: Install kubectl on Ubuntu"
       uri:
         url: https://storage.googleapis.com/kubernetes-release/release/{{ response_kubernetes_version['content'] }}/bin/linux/amd64/kubectl
         follow_redirects: yes # curl -L
         dest: /usr/local/bin/kubectl
         mode: "0540"
 
-    - name: "Step 4.3: Check kubectl version"
+    - name: "Step 4.4: Check kubectl version"
       command: kubectl version -o json  --client
       register: kubectl_version
 
     - debug: var=kubectl_version.stdout
 
     - name: "Step 5: Starting minikube on Ubuntu"
-      command: minikube start --vm-driver=virtualbox --disk-size=4096 --cpus=2 --memory=4096
+      command: minikube start --vm-driver=none --kubernetes-version={{ response_kubernetes_version['content'] }}
       # register: minikube_start
       # notify:
       #   - restart_minikube
