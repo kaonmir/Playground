@@ -1,0 +1,10 @@
+---
+- name: Install Nginx on Ubuntu
+  hosts: ubuntu
+  become: true
+  tasks:
+    - name: "Step 3.3: Check Minikube version"
+      command: which ls
+      register: which_ls
+
+    - debug: var=which_ls.stdout

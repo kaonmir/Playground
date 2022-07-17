@@ -1,0 +1,2 @@
+[ubuntu]
+ubuntu1 ansible_host=192.168.43.232 ansible_user=kaonmir ansible_ssh_private_key_file=~/.ssh/id_rsa
