@@ -1,4 +1,5 @@
 from celery import Celery
+import smtplib
 
 app = Celery(
     "son_tasks",
