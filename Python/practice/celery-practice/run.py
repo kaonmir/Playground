@@ -7,10 +7,12 @@ Task를 엮은 workflow는 producer/consumer 어디에나 작성할 수 있습�
 여기서는 proudcer 단에서 구현하여 봅시다.
 """
 
-from celery import group
-from tasks.calc import add
-from tasks.email import notify
-from tasks.log import log_message
+from celery_app import app
 
-links = add.s(3, 2) | group(notify.s() | log_message.s())
-links()
+# from tasks.calc import add
+# from tasks.email import notify
+# from tasks.log import log_message
+
+# links = add.s(3, 2) | group(notify.s() | log_message.s())
+
+app.send_task("tasks.calc.add", args=[1190, 42242])
