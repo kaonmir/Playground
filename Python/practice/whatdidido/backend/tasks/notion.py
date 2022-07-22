@@ -28,4 +28,4 @@ def createNotionItemToDatabase(restaurant, menu):
     print(res.status_code)
     print(res.text)
 
-    return -145
+    return f"{restaurant}, {menu} is added to database"
