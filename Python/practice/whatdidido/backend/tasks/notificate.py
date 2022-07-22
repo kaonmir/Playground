@@ -6,7 +6,7 @@ from email.message import EmailMessage
 def emailNotionItemAdded(message):
     msg = EmailMessage()
     msg["Subject"] = "Notion Item is added to database"
-    msg.set_content(f"{str(message)} is updated")
+    msg.set_content(f"{str(message)}")
     msg["From"] = "thswpvm1111@gmail.com"
     msg["To"] = "sonjeff@naver.com"
 

@@ -32,6 +32,9 @@ def hello_world():
         celery.send_task(
             name="tasks.notion.createNotionItemToDatabase",
             args=[restaurant, menu],
+            chain=[
+                Signature("tasks.notificate.emailNotionItemAdded"),
+            ],
         )
         return redirect(url_for("about"))
 
