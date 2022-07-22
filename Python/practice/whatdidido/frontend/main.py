@@ -22,10 +22,16 @@ def hello_world():
         menu = request.form["menu"]
 
         # | Signature("tasks.notificate.notifyToEmailFromResult")
+        # celery.send_task(
+        #     name="tasks.notion.createNotionItemToDatabase",
+        #     args=[restaurant, menu],
+        #     chain=[Signature("tasks.notificate.emailNotionItemAdded")],
+        # )
+
+        # celery.send_task(name="tasks.calc.add", args=[1, 2])
         celery.send_task(
             name="tasks.notion.createNotionItemToDatabase",
             args=[restaurant, menu],
-            chain=[Signature("tasks.notificate.emailNotionItemAdded")],
         )
         return redirect(url_for("about"))
 

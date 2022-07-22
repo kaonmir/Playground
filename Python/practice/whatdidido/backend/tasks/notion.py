@@ -7,7 +7,7 @@ from celery_app import celery, headers, NOTION_DATABASE_ID
 def formatNotionPage(restaurant, menu):
     return {
         "parent": {
-            "database_id": {NOTION_DATABASE_ID},
+            "database_id": NOTION_DATABASE_ID,
         },
         "properties": {
             "Restaurant": {"title": [{"text": {"content": restaurant}}]},
