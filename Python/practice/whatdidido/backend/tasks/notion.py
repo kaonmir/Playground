@@ -1,8 +1,7 @@
 import json
 
 import requests
-from celery_app import celery, smtp_gmail, headers, NOTION_DATABASE_ID
-from email.message import EmailMessage
+from celery_app import celery, headers, NOTION_DATABASE_ID
 
 
 def formatNotionPage(restaurant, menu):
@@ -19,6 +18,7 @@ def formatNotionPage(restaurant, menu):
 
 @celery.task
 def createNotionItemToDatabase(restaurant, menu):
+    print("Start createNotionItemToDatabase function")
     notion_database_url = "https://api.notion.com/v1/pages"
     newPageData = formatNotionPage(restaurant, menu)
     data = json.dumps(newPageData)
