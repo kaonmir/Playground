@@ -3,13 +3,12 @@ from email.message import EmailMessage
 
 
 @celery.task
-def notifyToEmailFromResult(result: int):
+def emailNotionItemAdded(message):
     msg = EmailMessage()
-    msg["Subject"] = "제목입니다."
-    msg.set_content(f"{str(result)}가 정답입니까?")
+    msg["Subject"] = "Notion Item is added to database"
+    msg.set_content(f"{str(message)} is updated")
     msg["From"] = "thswpvm1111@gmail.com"
     msg["To"] = "sonjeff@naver.com"
 
     smtp_gmail.send_message(msg)
-
     return -143

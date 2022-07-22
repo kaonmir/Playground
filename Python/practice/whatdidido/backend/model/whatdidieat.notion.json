@@ -1,0 +1,22 @@
+{
+  "parent": {
+    "database_id": "2fe9186786814c768f4a91ac4cdbb257"
+  },
+  "properties": {
+    "Restaurant": {
+      "title": [
+        {
+          "text": {
+            "content": "Bench Press"
+          }
+        }
+      ]
+    },
+    "Menu": {
+      "select": {
+        "name": "Ramen",
+        "color": "orange"
+      }
+    }
+  }
+}

@@ -3,7 +3,6 @@
 from flask import (
     Flask,
     flash,
-    message_flashed,
     redirect,
     render_template,
     request,
@@ -19,21 +18,16 @@ app.config["SECRET_KEY"] = "asfjpbiowe9237nkl"
 @app.route("/", methods=("GET", "POST"))
 def hello_world():
     if request.method == "POST":
-        number1 = request.form["number1"]
-        number2 = request.form["number2"]
+        restaurant = request.form["restaurant"]
+        menu = request.form["menu"]
 
-        if not number1:
-            flash("Number1 is required!")
-        elif not number2:
-            flash("Number2 is required!")
-        else:
-            # | Signature("tasks.notificate.notifyToEmailFromResult")
-            celery.send_task(
-                name="tasks.calc.add",
-                args=[int(number1), int(number2)],
-                chain=[Signature("tasks.notificate.notifyToEmailFromResult")],
-            )
-            return redirect(url_for("about"))
+        # | Signature("tasks.notificate.notifyToEmailFromResult")
+        celery.send_task(
+            name="tasks.notion.createNotionItemToDatabase",
+            args=[restaurant, menu],
+            chain=[Signature("tasks.notificate.emailNotionItemAdded")],
+        )
+        return redirect(url_for("about"))
 
     return render_template("index.html")
 

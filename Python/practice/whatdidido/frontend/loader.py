@@ -20,5 +20,5 @@ celery = Celery(
     "tasks",
     broker=RABBITMQ_URL,
     backend="rpc://",
-    include=["tasks.calc", "tasks.notificate"],
+    include=["tasks.calc", "tasks.notificate", "tasks.notion"],
 )

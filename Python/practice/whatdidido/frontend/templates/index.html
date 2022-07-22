@@ -2,17 +2,17 @@
 <div>
   <div>
     <article>
-      <h1>숫자 더하기! </h1>
+      <h1>What Did I Eat? </h1>
       <div>
         <form method="post">
-          <label for="title">Title</label>
           <br>
-          <input type="text" name="number1"
-                 placeholder="Number 1"
-                 value="{{ request.form['number1'] }}"></input>
-          <input type="text" name="number2"
-                placeholder="Number 2"
-                value="{{ request.form['number2'] }}"></input>
+          
+          <input type="text" name="restaurant"
+                 placeholder="Restaurant"
+                 value="{{ request.form['restaurant'] }}"></input>
+          <input type="text" name="menu"
+                placeholder="Menu"
+                value="{{ request.form['menu'] }}"></input>
           <br>
 
           <button type="submit">Submit</button>
