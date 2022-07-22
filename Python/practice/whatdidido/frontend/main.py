@@ -1,34 +1,46 @@
 #!/usr/bin/python3
 
-from flask import Flask
-from celery import Celery
-
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-RABBITMQ_URL = os.getenv("RABBITMQ_URL")
-if RABBITMQ_URL is None:
-    raise Exception("Please set RABBITMQ_URL environment variable.")
-
-
-celery = Celery(
-    "tasks",
-    broker=RABBITMQ_URL,
-    backend="rpc://",
-    include=["tasks.calc"],  # ["tasks.calc", "tasks.email", "tasks.log"]
+from flask import (
+    Flask,
+    flash,
+    message_flashed,
+    redirect,
+    render_template,
+    request,
+    url_for,
 )
-
+from loader import celery, HOST, PORT
+from celery import Signature
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "asfjpbiowe9237nkl"
 
 
-@app.route("/")
+@app.route("/", methods=("GET", "POST"))
 def hello_world():
-    celery.send_task("tasks.calc.add", (2, 109000000))
-    return "Hello World!"
+    if request.method == "POST":
+        number1 = request.form["number1"]
+        number2 = request.form["number2"]
+
+        if not number1:
+            flash("Number1 is required!")
+        elif not number2:
+            flash("Number2 is required!")
+        else:
+            chain = Signature(
+                "tasks.calc.add", args=[int(number1), int(number2)]
+            ) | Signature("tasks.notificate.notifyToEmailFromResult")
+            chain()
+
+            return redirect(url_for("about"))
+
+    return render_template("index.html")
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html", title="About")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
+    app.run(host=HOST, port=PORT)
