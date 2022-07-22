@@ -27,11 +27,12 @@ def hello_world():
         elif not number2:
             flash("Number2 is required!")
         else:
-            chain = Signature(
-                "tasks.calc.add", args=[int(number1), int(number2)]
-            ) | Signature("tasks.notificate.notifyToEmailFromResult")
-            chain()
-
+            # | Signature("tasks.notificate.notifyToEmailFromResult")
+            celery.send_task(
+                name="tasks.calc.add",
+                args=[int(number1), int(number2)],
+                chain=[Signature("tasks.notificate.notifyToEmailFromResult")],
+            )
             return redirect(url_for("about"))
 
     return render_template("index.html")
