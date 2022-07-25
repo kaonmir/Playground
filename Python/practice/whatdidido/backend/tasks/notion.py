@@ -22,10 +22,8 @@ def createNotionItemToDatabase(restaurant, menu):
     notion_database_url = "https://api.notion.com/v1/pages"
     newPageData = formatNotionPage(restaurant, menu)
     data = json.dumps(newPageData)
-
     res = requests.request("POST", notion_database_url, headers=headers, data=data)
-
-    print(res.status_code)
-    print(res.text)
+    if res.status_code != 200:
+        raise Exception("Error creating new page in Notion")
 
     return f"You have eaten {menu} at {restaurant}"
