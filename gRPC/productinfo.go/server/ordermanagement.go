@@ -16,7 +16,8 @@ import (
 
 type OrderManagement struct {
 	pb.UnimplementedOrderManagementServer
-	orderMap map[string]*pb.Order
+	orderMap            map[string]*pb.Order
+	combinedShipmentMap map[string]*pb.CombinedShipment
 }
 
 func (m *OrderManagement) GetOrder(ctx context.Context, in *wrappers.StringValue) (*pb.Order, error) {
@@ -76,5 +77,51 @@ func (m *OrderManagement) UpdateOrders(stream pb.OrderManagement_UpdateOrdersSer
 		log.Print("Updated order " + order.Id)
 		orderStr += order.Id + " "
 	}
+}
 
+func (m *OrderManagement) ProcessOrders(stream pb.OrderManagement_ProcessOrdersServer) error {
+	if m.combinedShipmentMap == nil {
+		m.combinedShipmentMap = make(map[string]*pb.CombinedShipment)
+	}
+
+	BATCH_SIZE := 3
+	for {
+		order, err := stream.Recv()
+		if err == io.EOF {
+			for _, comb := range m.combinedShipmentMap {
+				stream.Send(comb)
+			}
+			return nil
+		}
+		if err != nil {
+			return fmt.Errorf("failed to receive order: %v", err)
+		}
+
+		out, err := uuid.NewV1()
+		if err != nil {
+			return fmt.Errorf("error creating UUID: %v", err)
+		}
+		order.Id = out.String()
+
+		if m.combinedShipmentMap[order.Destination] == nil {
+			orderList := make([]*pb.Order, 0, BATCH_SIZE)
+			m.combinedShipmentMap[order.Destination] = &pb.CombinedShipment{
+				Status:      "Processing",
+				Destination: order.Destination,
+				OrdersList:  orderList,
+			}
+		}
+
+		combinedShipment := m.combinedShipmentMap[order.Destination]
+		combinedShipment.OrdersList = append(combinedShipment.OrdersList, order)
+		log.Printf("Processing order from %v, len: %d", order.Destination, len(combinedShipment.OrdersList))
+
+		if len(combinedShipment.OrdersList) == BATCH_SIZE {
+			err := stream.Send(m.combinedShipmentMap[order.Destination])
+			if err != nil {
+				return fmt.Errorf("failed to send order: %v", err)
+			}
+			combinedShipment.OrdersList = make([]*pb.Order, 0, BATCH_SIZE)
+		}
+	}
 }
