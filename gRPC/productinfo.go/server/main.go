@@ -8,6 +8,7 @@ import (
 	pb "productinfo/protos"
 
 	"github.com/gofrs/uuid"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -15,7 +16,9 @@ import (
 
 type server struct {
 	pb.UnimplementedProductInfoServer
+	pb.UnimplementedOrderManagementServer
 	productMap map[string]*pb.Product
+	orderMap   map[string]*pb.Order
 }
 
 func (s *server) AddProduct(ctx context.Context, in *pb.Product) (*pb.ProductID, error) {
@@ -40,6 +43,15 @@ func (s *server) GetProduct(ctx context.Context, in *pb.ProductID) (*pb.Product,
 	return nil, status.Errorf(codes.NotFound, "Product not found", in.Value)
 }
 
+func (s *server) GetOrder(ctx context.Context, in *wrappers.StringValue) (*pb.Order, error) {
+	if s.orderMap[in.Value] == nil {
+		return nil, status.Errorf(codes.NotFound, "Order not found", in.Value)
+	}
+
+	ord := s.orderMap[in.Value]
+	return ord, status.New(codes.OK, "Order found").Err()
+}
+
 var (
 	addr = flag.String("addr", "localhost:50051", "the address to connect to")
 )
@@ -52,6 +64,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	pb.RegisterProductInfoServer(s, &server{})
+	pb.RegisterOrderManagementServer(s, &server{})
 
 	log.Printf("Server listening on %s", *addr)
 	if err := s.Serve(lis); err != nil {

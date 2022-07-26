@@ -1,0 +1,20 @@
+syntax = "proto3";
+package protos;
+
+// StringValue와 같이 잘 알려진 타입을 활용한다.
+option go_package = "kaonmir.xyz/productinfo";
+
+import "google/protobuf/wrappers.proto";
+
+service OrderManagement {
+  rpc GetOrder(google.protobuf.StringValue) returns (Order) {}
+}
+
+
+message Order {
+  string id = 1;
+  repeated string items = 2; // repeated string는 배열이다.
+  string description = 3;
+  float price = 4;
+  string destination = 5;
+}

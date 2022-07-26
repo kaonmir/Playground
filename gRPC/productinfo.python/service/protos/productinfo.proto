@@ -1,5 +1,5 @@
 syntax = "proto3";
-package protos;
+package ecommerce;
 
 option go_package = "kaonmir.xyz/productinfo";
 
