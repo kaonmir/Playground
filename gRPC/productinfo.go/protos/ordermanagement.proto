@@ -8,6 +8,12 @@ import "google/protobuf/wrappers.proto";
 
 service OrderManagement {
   rpc GetOrder(google.protobuf.StringValue) returns (Order) {}
+  // Retreive all orders which are includeing the given item.
+  rpc SearchOrders(google.protobuf.StringValue) returns (stream Order) {}
+
+  rpc AddOrder(Order) returns (google.protobuf.StringValue) {}
+
+  rpc updateOrders(stream Order) returns (google.protobuf.StringValue) {}
 }
 
 

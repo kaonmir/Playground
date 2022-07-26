@@ -24,6 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderManagementClient interface {
 	GetOrder(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (*Order, error)
+	// Retreive all orders which are includeing the given item.
+	SearchOrders(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (OrderManagement_SearchOrdersClient, error)
+	AddOrder(ctx context.Context, in *Order, opts ...grpc.CallOption) (*wrapperspb.StringValue, error)
+	UpdateOrders(ctx context.Context, opts ...grpc.CallOption) (OrderManagement_UpdateOrdersClient, error)
 }
 
 type orderManagementClient struct {
@@ -43,11 +47,90 @@ func (c *orderManagementClient) GetOrder(ctx context.Context, in *wrapperspb.Str
 	return out, nil
 }
 
+func (c *orderManagementClient) SearchOrders(ctx context.Context, in *wrapperspb.StringValue, opts ...grpc.CallOption) (OrderManagement_SearchOrdersClient, error) {
+	stream, err := c.cc.NewStream(ctx, &OrderManagement_ServiceDesc.Streams[0], "/protos.OrderManagement/SearchOrders", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &orderManagementSearchOrdersClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type OrderManagement_SearchOrdersClient interface {
+	Recv() (*Order, error)
+	grpc.ClientStream
+}
+
+type orderManagementSearchOrdersClient struct {
+	grpc.ClientStream
+}
+
+func (x *orderManagementSearchOrdersClient) Recv() (*Order, error) {
+	m := new(Order)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *orderManagementClient) AddOrder(ctx context.Context, in *Order, opts ...grpc.CallOption) (*wrapperspb.StringValue, error) {
+	out := new(wrapperspb.StringValue)
+	err := c.cc.Invoke(ctx, "/protos.OrderManagement/AddOrder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderManagementClient) UpdateOrders(ctx context.Context, opts ...grpc.CallOption) (OrderManagement_UpdateOrdersClient, error) {
+	stream, err := c.cc.NewStream(ctx, &OrderManagement_ServiceDesc.Streams[1], "/protos.OrderManagement/updateOrders", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &orderManagementUpdateOrdersClient{stream}
+	return x, nil
+}
+
+type OrderManagement_UpdateOrdersClient interface {
+	Send(*Order) error
+	CloseAndRecv() (*wrapperspb.StringValue, error)
+	grpc.ClientStream
+}
+
+type orderManagementUpdateOrdersClient struct {
+	grpc.ClientStream
+}
+
+func (x *orderManagementUpdateOrdersClient) Send(m *Order) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *orderManagementUpdateOrdersClient) CloseAndRecv() (*wrapperspb.StringValue, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(wrapperspb.StringValue)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // OrderManagementServer is the server API for OrderManagement service.
 // All implementations must embed UnimplementedOrderManagementServer
 // for forward compatibility
 type OrderManagementServer interface {
 	GetOrder(context.Context, *wrapperspb.StringValue) (*Order, error)
+	// Retreive all orders which are includeing the given item.
+	SearchOrders(*wrapperspb.StringValue, OrderManagement_SearchOrdersServer) error
+	AddOrder(context.Context, *Order) (*wrapperspb.StringValue, error)
+	UpdateOrders(OrderManagement_UpdateOrdersServer) error
 	mustEmbedUnimplementedOrderManagementServer()
 }
 
@@ -57,6 +140,15 @@ type UnimplementedOrderManagementServer struct {
 
 func (UnimplementedOrderManagementServer) GetOrder(context.Context, *wrapperspb.StringValue) (*Order, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrder not implemented")
+}
+func (UnimplementedOrderManagementServer) SearchOrders(*wrapperspb.StringValue, OrderManagement_SearchOrdersServer) error {
+	return status.Errorf(codes.Unimplemented, "method SearchOrders not implemented")
+}
+func (UnimplementedOrderManagementServer) AddOrder(context.Context, *Order) (*wrapperspb.StringValue, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddOrder not implemented")
+}
+func (UnimplementedOrderManagementServer) UpdateOrders(OrderManagement_UpdateOrdersServer) error {
+	return status.Errorf(codes.Unimplemented, "method UpdateOrders not implemented")
 }
 func (UnimplementedOrderManagementServer) mustEmbedUnimplementedOrderManagementServer() {}
 
@@ -89,6 +181,71 @@ func _OrderManagement_GetOrder_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderManagement_SearchOrders_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(wrapperspb.StringValue)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(OrderManagementServer).SearchOrders(m, &orderManagementSearchOrdersServer{stream})
+}
+
+type OrderManagement_SearchOrdersServer interface {
+	Send(*Order) error
+	grpc.ServerStream
+}
+
+type orderManagementSearchOrdersServer struct {
+	grpc.ServerStream
+}
+
+func (x *orderManagementSearchOrdersServer) Send(m *Order) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _OrderManagement_AddOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Order)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderManagementServer).AddOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.OrderManagement/AddOrder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderManagementServer).AddOrder(ctx, req.(*Order))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderManagement_UpdateOrders_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(OrderManagementServer).UpdateOrders(&orderManagementUpdateOrdersServer{stream})
+}
+
+type OrderManagement_UpdateOrdersServer interface {
+	SendAndClose(*wrapperspb.StringValue) error
+	Recv() (*Order, error)
+	grpc.ServerStream
+}
+
+type orderManagementUpdateOrdersServer struct {
+	grpc.ServerStream
+}
+
+func (x *orderManagementUpdateOrdersServer) SendAndClose(m *wrapperspb.StringValue) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *orderManagementUpdateOrdersServer) Recv() (*Order, error) {
+	m := new(Order)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // OrderManagement_ServiceDesc is the grpc.ServiceDesc for OrderManagement service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -100,7 +257,22 @@ var OrderManagement_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetOrder",
 			Handler:    _OrderManagement_GetOrder_Handler,
 		},
+		{
+			MethodName: "AddOrder",
+			Handler:    _OrderManagement_AddOrder_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SearchOrders",
+			Handler:       _OrderManagement_SearchOrders_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "updateOrders",
+			Handler:       _OrderManagement_UpdateOrders_Handler,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "protos/ordermanagement.proto",
 }
