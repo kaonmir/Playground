@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ecommerce;
 
+option go_package = "kaonmir.xyz/productinfo";
+
 service ProductInfo {
   rpc addProduct(Product) returns (ProductID) {}
   rpc getProduct(ProductID) returns (Product) {}
@@ -9,6 +11,7 @@ service ProductInfo {
 message Product {
   string id = 1;
   string name = 2;
+  float price = 3;
 }
 
 message ProductID {

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+// StringValue와 같이 잘 알려진 타입을 활용한다.
+import "google/protobuf/wrappers.proto";
+
+package ecommerce;
+
+service OrderManagement {
+  rpc GetOrder(google.protobuf.StringValue) returns (Order) {}
+  // rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
+  // rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {}
+}
+
+
+message Order {
+  string id = 1;
+  repeated string items = 2; // repeated string는 배열이다.
+  string description = 3;
+  float price = 4;
+  string destination = 5;
+}
