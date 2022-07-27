@@ -15,6 +15,7 @@ var (
 
 func main() {
 	flag.Parse()
+
 	lis, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

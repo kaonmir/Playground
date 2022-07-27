@@ -16,8 +16,7 @@ import (
 
 type OrderManagement struct {
 	pb.UnimplementedOrderManagementServer
-	orderMap            map[string]*pb.Order
-	combinedShipmentMap map[string]*pb.CombinedShipment
+	orderMap map[string]*pb.Order
 }
 
 func (m *OrderManagement) GetOrder(ctx context.Context, in *wrappers.StringValue) (*pb.Order, error) {
@@ -80,16 +79,16 @@ func (m *OrderManagement) UpdateOrders(stream pb.OrderManagement_UpdateOrdersSer
 }
 
 func (m *OrderManagement) ProcessOrders(stream pb.OrderManagement_ProcessOrdersServer) error {
-	if m.combinedShipmentMap == nil {
-		m.combinedShipmentMap = make(map[string]*pb.CombinedShipment)
-	}
-
+	combinedShipmentMap := make(map[string]*pb.CombinedShipment)
 	BATCH_SIZE := 3
+
 	for {
 		order, err := stream.Recv()
 		if err == io.EOF {
-			for _, comb := range m.combinedShipmentMap {
-				stream.Send(comb)
+			for _, comb := range combinedShipmentMap {
+				if len(comb.OrdersList) > 0 {
+					stream.Send(comb)
+				}
 			}
 			return nil
 		}
@@ -103,21 +102,21 @@ func (m *OrderManagement) ProcessOrders(stream pb.OrderManagement_ProcessOrdersS
 		}
 		order.Id = out.String()
 
-		if m.combinedShipmentMap[order.Destination] == nil {
+		if combinedShipmentMap[order.Destination] == nil {
 			orderList := make([]*pb.Order, 0, BATCH_SIZE)
-			m.combinedShipmentMap[order.Destination] = &pb.CombinedShipment{
+			combinedShipmentMap[order.Destination] = &pb.CombinedShipment{
 				Status:      "Processing",
 				Destination: order.Destination,
 				OrdersList:  orderList,
 			}
 		}
 
-		combinedShipment := m.combinedShipmentMap[order.Destination]
+		combinedShipment := combinedShipmentMap[order.Destination]
 		combinedShipment.OrdersList = append(combinedShipment.OrdersList, order)
 		log.Printf("Processing order from %v, len: %d", order.Destination, len(combinedShipment.OrdersList))
 
 		if len(combinedShipment.OrdersList) == BATCH_SIZE {
-			err := stream.Send(m.combinedShipmentMap[order.Destination])
+			err := stream.Send(combinedShipmentMap[order.Destination])
 			if err != nil {
 				return fmt.Errorf("failed to send order: %v", err)
 			}

@@ -71,101 +71,24 @@ func main() {
 	// Contact the server and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-	/*
-		// Add Some Orders
-		id1 := addOrder(c, ctx, 3)
-		id2 := addOrder(c, ctx, 2)
-		id3 := addOrder(c, ctx, 1)
-		id4 := addOrder(c, ctx, 3)
-
-		log.Print("Added Orders: " + id1.Value + ", " + id2.Value + ", " + id3.Value + ", " + id4.Value )
-	*/
-	// Get Order by Id
-	/*
-		order, err := c.GetOrder(ctx, id)
-		if err != nil {
-			log.Fatalf("could not get order: %v", err)
-		}
-		log.Print("GetOrder Response -> : ", order)
-		orders, err := c.GetOrder(ctx, &wrappers.StringValue{Value: "106"})
-	*/
-
-	// Get Orders by Search Query
-	/*
-		searchStream, _ := c.SearchOrders(ctx, &wrappers.StringValue{Value: "banana"})
-		for {
-			searchOrder, err := searchStream.Recv()
-			if err == io.EOF {
-				break
-			}
-			log.Print("SearchOrder Response -> : ", searchOrder)
-		}
-	*/
-
-	/*
-		// Retrieve the order update stream
-		updateStream, err := c.UpdateOrders(ctx)
-		if err != nil {
-			log.Fatalf("could not get order update stream: %v", err)
-		}
-
-		// Update Orders
-			if err := updateStream.Send(newRandomOrder(3, id1.Value )); err != nil {
-				log.Fatalf("%v.Send(%v) = %v", updateStream, id1, err)
-			}
-
-			if err := updateStream.Send(newRandomOrder(3, id2.Value )); err != nil {
-				log.Fatalf("%v.Send(%v) = %v", updateStream, id2, err)
-			}
-
-			if err := updateStream.Send(newRandomOrder(4, id3.Value )); err != nil {
-				log.Fatalf("%v.Send(%v) = %v", updateStream, id3, err)
-			}
-
-			updateRes, err := updateStream.CloseAndRecv()
-			if err != nil {
-				log.Fatalf("%v.CloseAndRecv() got 'error %v', want %v", updateStream, err, nil)
-			}
-
-			log.Printf("Update Orders Res : %s", updateRes.String())
-	*/
 
 	// Process Orders and Retrieve the combined shipment
 	processStream, err := c.ProcessOrders(ctx)
 	if err != nil {
-		log.Fatalf("could not get order process stream: %v", err)
-	}
-
-	if err := processStream.Send(newRandomOrder(3, "")); err != nil {
-		log.Fatalf("%v.Send = %v", processStream, err)
-	}
-
-	if err := processStream.Send(newRandomOrder(3, "")); err != nil {
-		log.Fatalf("%v.Send = %v", processStream, err)
+		log.Fatalf("could not process orders: %v", err)
 	}
 
 	channel := make(chan struct{})
 	go asyncBidirectionalRPC(processStream, channel)
-	time.Sleep(time.Millisecond * 1000)
 
-	if err := processStream.Send(newRandomOrder(3, "")); err != nil {
-		log.Fatalf("%v.Send = %v", processStream, err)
-	}
-
-	if err := processStream.Send(newRandomOrder(3, "")); err != nil {
-		log.Fatalf("%v.Send = %v", processStream, err)
-	}
-	if err := processStream.Send(newRandomOrder(3, "")); err != nil {
-		log.Fatalf("%v.Send = %v", processStream, err)
-	}
-	if err := processStream.Send(newRandomOrder(3, "")); err != nil {
-		log.Fatalf("%v.Send = %v", processStream, err)
+	// for 6 times process Stream
+	for i := 0; i < 10; i++ {
+		time.Sleep(time.Millisecond * 300)
+		if err := processStream.Send(newRandomOrder(3, "")); err != nil {
+			log.Fatalf("%v.Send = %v", processStream, err)
+		}
 	}
 
-	if err := processStream.CloseSend(); err != nil {
-		log.Fatal(err)
-	}
-
+	processStream.CloseSend()
 	<-channel
-
 }
