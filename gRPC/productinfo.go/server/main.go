@@ -6,6 +6,8 @@ import (
 	"net"
 	pb "productinfo/protos"
 
+	"productinfo/server/interceptor"
+
 	"google.golang.org/grpc"
 )
 
@@ -20,7 +22,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.OrderUnaryServerInterceptor),
+		grpc.StreamInterceptor(interceptor.OrderServerStreamInterceptor),
+	)
 	pb.RegisterProductInfoServer(s, &ProductInfo{})
 	pb.RegisterOrderManagementServer(s, &OrderManagement{})
 
