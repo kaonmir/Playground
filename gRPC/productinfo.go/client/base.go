@@ -20,7 +20,8 @@ func NewOrderManagementClient() (*grpc.ClientConn, context.Context, context.Canc
 	}
 
 	// Contact the server and print out its response.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Duration(time.Second*1)))
 
 	c := pb.NewOrderManagementClient(conn)
 

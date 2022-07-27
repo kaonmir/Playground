@@ -51,7 +51,7 @@ func Senario3(ctx context.Context, c pb.OrderManagementClient) {
 	for i := 0; i < 10; i++ {
 		time.Sleep(time.Millisecond * 300)
 		if err := processStream.Send(NewRandomOrder(3, "")); err != nil {
-			log.Fatalf("%v.Send = %v", processStream, err)
+			log.Fatalf("could not send order: %v", err)
 		}
 	}
 

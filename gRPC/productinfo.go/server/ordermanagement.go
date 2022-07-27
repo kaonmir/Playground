@@ -57,6 +57,10 @@ func (m *OrderManagement) AddOrder(ctx context.Context, in *pb.Order) (*wrappers
 	if m.orderMap == nil {
 		m.orderMap = make(map[string]*pb.Order)
 	}
+
+	// TODO: You must remove after testing Deadline
+	// time.Sleep(2 * time.Second)
+
 	m.orderMap[in.Id] = in
 	log.Print("Added order " + in.Id)
 	return &wrappers.StringValue{Value: in.Id}, status.New(codes.OK, "Order added").Err()
