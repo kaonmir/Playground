@@ -4,6 +4,7 @@ const observableCreated$ = new Observable<number>((observer) => {
   for (let i = 1; i <= 5; i++) {
     setTimeout(() => {
       observer.next(i);
+
       if (i === 10) {
         observer.complete();
       }
