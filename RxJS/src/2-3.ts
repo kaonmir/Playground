@@ -5,7 +5,7 @@ const observableCreated$ = new Observable<number>((observer) => {
   observer.next(1);
   observer.next(2);
   observer.complete();
-  console.log("END Observable");
+  console.log("END Observable ");
 });
 
 const observer: Observer<number> = {
