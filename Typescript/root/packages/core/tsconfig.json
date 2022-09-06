@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+
+    "module": "ES2020",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+
+    "outDir": "build/",
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    "plugins": [
+      {
+        "name": "@rollup/plugin-typescript"
+      }
+    ]
+  }
+}
