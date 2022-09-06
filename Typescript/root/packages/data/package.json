@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "core": "*", 
+    "core": "file:../core", 
     
     "@rollup/plugin-typescript": "^8.3.3",
     "@types/jest": "^28.1.6",

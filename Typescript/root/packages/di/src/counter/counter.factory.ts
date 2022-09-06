@@ -13,4 +13,8 @@ export class CounterFactory {
   getCreateCounterUsecase(): core.CreateCounterUsecase {
     return new core.CreateCounterUsecaseImpl(this.counterRepository);
   }
+
+  getGetAllCountersUsecase(): core.GetAllCountersUsecase {
+    return new core.GetAllCountersUsecaseImpl(this.counterRepository);
+  }
 }
